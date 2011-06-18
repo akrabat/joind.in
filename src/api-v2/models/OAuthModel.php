@@ -1,21 +1,43 @@
 <?php
+/**
+ * OAuth model
+ *
+ * PHP version 5
+ *
+ * @category Model
+ * @package  API
+ * @author   Lorna Mitchel <lorna.mitchell@gmail.com>
+ * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
+ */
 
-class OAuthModel {
+/**
+ * OAuth model
+ *
+ * @category Model
+ * @package  API
+ * @author   Lorna Mitchel <lorna.mitchell@gmail.com>
+ * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
+ */
+class OAuthModel
+{
     /**
-     * Fetches the consumer secret from the database so the oauth extension can verify it
+     * Fetches the consumer secret from the database so the oauth extension 
+     * can verify it
      * 
-     * @param PDO $db the database handle
+     * @param PDO    $db  the database handle
      * @param string $key oauth consumer key
+     * 
      * @return string/bool the secret, or false if it couldn't be retrieved
      */
-    public function getConsumerSecretByKey(PDO $db, $key) {
+    public function getConsumerSecretByKey(PDO $db, $key)
+    {
         $sql = 'select consumer_secret from oauth_consumers '
             . 'where consumer_key = :key';
         $stmt = $db->prepare($sql);
-        $response = $stmt->execute(array(
-            ':key' => $key
-            ));
-        if($response) {
+        $response = $stmt->execute(array(':key' => $key));
+        if ($response) {
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // just one row needed
             return $results[0];
@@ -24,13 +46,17 @@ class OAuthModel {
     }
 
     /**
-     * generates request token and secret, saves to the database with consumer key, then returns them
+     * generates request token and secret, saves to the database with 
+     * consumer key, then returns them
      * 
-     * @param PDO $db connection to the joind.in database
+     * @param PDO    $db       connection to the joind.in database
      * @param string $callback where to forward the user to, or "oob" for devices
-     * @return array the request_token and request_token secret that were generated and saved
+     * 
+     * @return array the request_token and request_token secret that were 
+     *               generated and saved
      */
-    public function newRequestToken(PDO $db, $callback) {
+    public function newRequestToken(PDO $db, $callback)
+    {
         // bin 2 hex because the binary isn't friendly
         $request_token = bin2hex($this->provider->generateToken(4));
         $request_token_secret = bin2hex($this->provider->generateToken(12));
@@ -40,14 +66,17 @@ class OAuthModel {
             . 'request_token = :request_token, '
             . 'request_token_secret = :request_token_secret, '
             . 'callback = :callback';
-        try{
+        try {
             $stmt = $db->prepare($sql);
-            $result = $stmt->execute(array(
-                "consumer_key" => $this->provider->consumer_key,
-                "request_token" => $request_token,
-                "request_token_secret" => $request_token_secret,
-                "callback" => $callback));
-            if($result) {
+            $result = $stmt->execute(
+                array(
+                    "consumer_key" => $this->provider->consumer_key,
+                    "request_token" => $request_token,
+                    "request_token_secret" => $request_token_secret,
+                    "callback" => $callback
+                )
+            );
+            if ($result) {
                 return array('request_token' => $request_token,
                     'request_token_secret' => $request_token_secret);
             } else {
@@ -55,7 +84,7 @@ class OAuthModel {
                 error_log('Error saving request token: ' . $error[2]);
                 return false;
             }
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log('Could not insert request token ' . $e->getMessage());
             return false;
         }
@@ -64,12 +93,14 @@ class OAuthModel {
     /**
      * Generate, store and return a new access token to the user
      * 
-     * @param PDO $db connection to the joind.in db
+     * @param PDO    $db            connection to the joind.in db
      * @param string $request_token supplied by the consumer
-     * @param string $verifier supplied by the consumer
+     * @param string $verifier      supplied by the consumer
+     * 
      * @return array containing the access token and secret 
      */
-    public function newAccessToken(PDO $db, $request_token, $verifier) {
+    public function newAccessToken(PDO $db, $request_token, $verifier)
+    {
         // bin 2 hex because the binary isn't friendly
         $access_token = bin2hex($this->provider->generateToken(8));
         $access_token_secret = bin2hex($this->provider->generateToken(16));
@@ -81,12 +112,14 @@ class OAuthModel {
             and verification = :verifier';
         try {
             $request_stmt = $db->prepare($request_sql);
-            $request_response = $request_stmt->execute(array(
-                "request_token" => $request_token,
-                "verifier" => $verifier
-                ));
+            $request_response = $request_stmt->execute(
+                array(
+                    "request_token" => $request_token,
+                    "verifier" => $verifier
+                )
+            );
             $request_data = $request_stmt->fetch();
-            if($request_data) {
+            if ($request_data) {
                 // now delete this token, we don't need it
                 $delete_sql = 'delete from oauth_request_tokens
                     where request_token = :request_token';
@@ -97,7 +130,9 @@ class OAuthModel {
                 return false;
             }
         } catch (PDOException $e) {
-            error_log('Could not retrieve/delete request token data ' . $e->getMessage());
+            error_log(
+                'Could not retrieve/delete request token data ' . $e->getMessage()
+            );
             return false;
         }
 
@@ -109,11 +144,14 @@ class OAuthModel {
             . 'user_id = :user_id';
         try{
             $stmt = $db->prepare($sql);
-            $stmt->execute(array(
-                "consumer_key" => $this->provider->consumer_key,
-                "access_token" => $access_token,
-                "access_token_secret" => $access_token_secret,
-                "user_id" => $request_data['user_id']));
+            $stmt->execute(
+                array(
+                    "consumer_key" => $this->provider->consumer_key,
+                    "access_token" => $access_token,
+                    "access_token_secret" => $access_token_secret,
+                    "user_id" => $request_data['user_id']
+                )
+            );
             return array('oauth_token' => $access_token,
                 'oauth_token_secret' => $access_token_secret);
         } catch(PDOException $e) {
@@ -125,18 +163,18 @@ class OAuthModel {
     /**
      * Fetch the request token secret for this token
      * 
-     * @param PDO $db the joind.in DB
+     * @param PDO    $db    the joind.in DB
      * @param string $token request token supplied by consumer
+     * 
      * @return string the token secret
      */
-    public function getRequestTokenSecretByToken(PDO $db, $token) {
+    public function getRequestTokenSecretByToken(PDO $db, $token)
+    {
         $sql = 'select request_token_secret from oauth_request_tokens '
             . 'where request_token = :token';
         $stmt = $db->prepare($sql);
-        $response = $stmt->execute(array(
-            ':token' => $token
-            ));
-        if($response) {
+        $response = $stmt->execute(array(':token' => $token));
+        if ($response) {
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // just one row needed
             return $results[0];
@@ -148,18 +186,18 @@ class OAuthModel {
     /**
      * Fetch the access token secret for this token
      * 
-     * @param PDO $db the joind.in DB
+     * @param PDO    $db    the joind.in DB
      * @param string $token access token supplied by consumer
+     * 
      * @return string the token secret
      */
-    public function getAccessTokenSecretByToken(PDO $db, $token) {
+    public function getAccessTokenSecretByToken(PDO $db, $token)
+    {
         $sql = 'select access_token_secret, user_id from oauth_access_tokens '
             . 'where access_token = :token';
         $stmt = $db->prepare($sql);
-        $response = $stmt->execute(array(
-            ':token' => $token
-            ));
-        if($response) {
+        $response = $stmt->execute(array(':token' => $token));
+        if ($response) {
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             // just one row needed
             return $results[0];
@@ -168,14 +206,26 @@ class OAuthModel {
 
     }
 
-    public function setUpOAuthAndDb($db) {
+    /**
+     * Set up the OuthProvider and the database
+     *
+     * @param PDO $db database adapter
+     * 
+     * @return boolean
+     */
+    public function setUpOAuthAndDb($db)
+    {
         $this->db = $db;
         try {
             $this->provider = new OAuthProvider();
             $this->provider->consumerHandler(array($this,'lookupConsumer'));    
-            $this->provider->timestampNonceHandler(array($this,'timestampNonceChecker'));
+            $this->provider->timestampNonceHandler(
+                array($this,'timestampNonceChecker')
+            );
             $this->provider->tokenHandler(array($this,'tokenHandler'));
-            $this->provider->setRequestTokenPath('/v2/oauth/request_token');  // No token needed for this end point
+            
+            // Note: no token needed for this end point
+            $this->provider->setRequestTokenPath('/v2/oauth/request_token');
             $this->provider->checkOAuthRequest();
         } catch (OAuthException $E) {
             error_log(OAuthProvider::reportProblem($E));
@@ -184,26 +234,52 @@ class OAuthModel {
         return true;
     }
 
-    public function lookupConsumer($provider) {
-        $consumer = $this->getConsumerSecretByKey($this->db, $provider->consumer_key);
+    /**
+     * Retrieve consumer's secret and add to provider
+     * 
+     * @param OAuthProvider $provider OAuth provider
+     * 
+     * @return int OAUTH_OK
+     */
+    public function lookupConsumer($provider)
+    {
+        $consumer = $this->getConsumerSecretByKey(
+            $this->db, $provider->consumer_key
+        );
         $provider->consumer_secret = $consumer['consumer_secret'];
 
         return OAUTH_OK;
     }
    
-    public function timestampNonceChecker() {
+    /**
+     * Nonce checker
+     *
+     * @return int OAUTH_OK
+     */
+    public function timestampNonceChecker()
+    {
         // TODO actually add some checking
         return OAUTH_OK;
     }
 
-    public function tokenHandler($provider) {
-        if(isset($this->in_flight) && $this->in_flight) {
+    /**
+     * Token handler
+     *
+     * @param OAuthProvider $provider OAuth provider
+     * 
+     * @return int OAUTH_OK 
+     */
+    public function tokenHandler($provider)
+    {
+        if (isset($this->in_flight) && $this->in_flight) {
             $token = $this->getAccessTokenSecretByToken($this->db, $provider->token);
             // set the user_id on the object, index.php uses it
             $this->user_id = $token['user_id'];
             $provider->token_secret = $token['access_token_secret'];
         } else {
-            $token = $this->getRequestTokenSecretByToken($this->db, $provider->token);
+            $token = $this->getRequestTokenSecretByToken(
+                $this->db, $provider->token
+            );
             $provider->token_secret = $token['request_token_secret'];
         }
         return OAUTH_OK;

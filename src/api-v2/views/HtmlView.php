@@ -1,13 +1,26 @@
 <?php
-
 /**
- * HTML View class: renders HTML 5
+ * HTML view class: renders HTML 5
+ *
+ * PHP version 5
  *
  * @category View
  * @package  API
  * @author   Lorna Mitchel <lorna.mitchell@gmail.com>
  * @author   Rob Allen <rob@akrabat.com>
  * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
+ */
+
+/**
+ * HTML view class: renders HTML 5
+ *
+ * @category View
+ * @package  API
+ * @author   Lorna Mitchel <lorna.mitchell@gmail.com>
+ * @author   Rob Allen <rob@akrabat.com>
+ * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
  */
 class HtmlView extends ApiView
 {

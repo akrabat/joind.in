@@ -137,7 +137,6 @@ class EventModel extends ApiModel
     public static function addHyperMedia($list, $request)
     {
         $host = $request->host;
-        
         $base_url = 'http://' . $host . '/v2/events/';
 
         // add per-item links 

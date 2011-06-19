@@ -1,9 +1,25 @@
 <?php
-
-/*
- * Request object
+/**
+ * Request
+ *
+ * PHP version 5
+ *
+ * @category Inc
+ * @package  API
+ * @author   Rob Allen <rob@akrabat.com>
+ * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
  */
 
+/**
+ * Request
+ *
+ * @category Inc
+ * @package  API
+ * @author   Rob Allen <rob@akrabat.com>
+ * @license  BSD see doc/LICENSE
+ * @link     http://github.com/joindin/joind.in
+ */
 class Request
 {
     public $verb;
@@ -14,6 +30,9 @@ class Request
     public $parameters = array();
     public $view;
 
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         $this->verb = $_SERVER['REQUEST_METHOD'];
@@ -30,6 +49,14 @@ class Request
         $this->parameters = $parameters;
     }
 
+    /**
+     * Get a parameter
+     *
+     * @param string $param   parameter
+     * @param string $default default value if parameter doesn't exist
+     * 
+     * @return string
+     */
     public function getParameter($param, $default = '')
     {
         $value = $default;
@@ -39,6 +66,14 @@ class Request
         return $value;
     }
     
+    /**
+     * Get URL element
+     *
+     * @param string $index   index within url element list
+     * @param string $default default value if parameter doesn't exist
+     * 
+     * @return string
+     */
     public function getUrlElement($index, $default = '') 
     {
         $index = (int)$index;
@@ -51,6 +86,13 @@ class Request
         return $element;
     }
     
+    /**
+     * Does the client accept a given header?
+     *
+     * @param string $header header
+     * 
+     * @return boolean
+     */
     public function accepts($header)
     {
         $result = false;
@@ -65,12 +107,13 @@ class Request
      * Determine if one of the accept headers matches one of the desired
      * formats
      * 
-     * @param array $formats
+     * @param array $formats list of formats
+     * 
      * @return string
      */
     public function preferredContentTypeOutOf($formats)
     {
-        foreach($formats as $format) {
+        foreach ($formats as $format) {
             if ($this->accepts($format)) {
                 return $format;
             }

@@ -73,9 +73,36 @@ class HtmlView extends ApiView
 <head>
     <title>API v2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+    body {
+        margin: 10px;
+    }
+    #content {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 15px;
+        color: #fff;
+        
+        background: #4A98D6; /* for non-css3 browsers */
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#024184', endColorstr='#4A98D6'); /* for IE */
+        background: -webkit-gradient(linear, left top, left bottom, from(#024184), to(#4A98D6)); /* for webkit browsers */
+        background: -moz-linear-gradient(top, #024184,  #4A98D6); /* for firefox 3.6+ */ 
+        
+        border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+        
+        padding: 5px;
+    }
+
+    ul {
+        padding-bottom: 15px;
+        padding-left: 20px;
+    } 
+    a {
+        color: #fff /*#FF950C*/;
+    }
+    </style>
 </head>
 <body>
-
+<div id="content">
 EOT;
     }
 
@@ -87,6 +114,7 @@ EOT;
     protected function layoutStop()
     {
         echo <<<EOT
+</div>
 </body>
 </html>
 

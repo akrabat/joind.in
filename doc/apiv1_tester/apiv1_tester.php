@@ -40,6 +40,7 @@ types & commands available:
 	* talk getdetail {talk_id}
 	* talk getcomments {talk_id}
 	* talk addcomment {talk_id} {rating} {comment} [{private=0}] [{user_id=2}]
+	* talk deletecomment {talk_id} {comment_id}
 	* talk claim {talk_id}
 
 	* comment isspam {commend_id} {talk_id} [{rtype=talk}]
@@ -82,6 +83,13 @@ function talk($command, $args)
 		case 'claim':
 			$talkId = getarg($args, 0);
 			$result = call_api('talk', 'getcomments', array("talk_id"=>$talkId));
+			break;
+
+		case 'deletecomment':
+			$talkId = getarg($args, 0);
+			$commentId = getarg($args, 1);
+			$result = call_api('talk', 'deletecomment',
+				array("talk_id"=>$talkId, "comment_id"=>$commentId));
 			break;
 
 		default:

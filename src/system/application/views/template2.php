@@ -173,7 +173,6 @@ $title[] = $this->config->item('site_name');
             <a href="/search">Search</a> |
             <a href="/about">About</a> |
             <a href="/help">Help</a> |
-            <a href="/blog">Blog</a> |
             <a href="/api">API</a> |
             <a href="/about/contact">Contact</a>
         </div>
